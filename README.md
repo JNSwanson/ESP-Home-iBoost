@@ -19,7 +19,7 @@ PIN CONNECTIONS:
 WARNING  : MISO is connected with both D6 and D2. The MCU cannot do digitalRead with MISO(D6)
     when SPI is active, so we digitalRead(D2) instead
     
-    
+<CODE>    
 The module pinout (component side) is:
        __________________________
 VCC   |                          |
@@ -30,6 +30,7 @@ MISO  |                          |GND
 GDO2  |                          |
 GDO0  |                          |
 CSN   |__________________________|
+</CODE>
 
 I bought a few of these modules and most have Xtals that are a little off frequency.  This affects the functioning of the module.  You can buy a better Xtal like Epson X1E0000210666 from Farnell (2471832), or change the frequency in the iBoost.h file.  Below are some suggested values:
 

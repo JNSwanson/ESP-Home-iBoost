@@ -32,7 +32,7 @@ GDO0  |                          |
 CSN   |__________________________|
 
 I bought a few of these modules and most have Xtals that are a little off frequency.  This affects the functioning of the module.  You can buy a better Xtal like Epson X1E0000210666 from Farnell (2471832), or change the frequency in the iBoost.h file.  Below are some suggested values:
-
+<TABLE>
 Freq		Dec		HEX
 868425000	2188965	2166A5
 868400000	2188902	216666
@@ -45,6 +45,7 @@ Freq		Dec		HEX
 868225000	2188461	2164AD
 868200000	2188398	21646E
 868175000	2188335	21642F
+</TABLE>                               
 
 you will need to change these lines:
 <CODE>

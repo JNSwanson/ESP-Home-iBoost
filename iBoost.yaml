@@ -26,7 +26,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Cc1101 Fallback Hotspot"
-    password: "fem3IwSSEgpX"
+    password: "????????"
 
 captive_portal:
 

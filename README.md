@@ -20,3 +20,14 @@ WARNING  : MISO is connected with both D6 and D2. The MCU cannot do digitalRead 
     when SPI is active, so we digitalRead(D2) instead
     
     
+The module pinout (component side) is:
+       __________________________
+VCC   |                          |
+GND   |                          |  
+MOSI  |                          |GND
+CLK   |                          |ANT
+MISO  |                          |GND
+GDO2  |                          |
+GDO0  |                          |
+CSN   |__________________________|
+

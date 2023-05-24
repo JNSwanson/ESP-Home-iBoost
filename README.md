@@ -57,6 +57,8 @@ radio.writeRegister(CC1101_FREQ1, 0x65);
 radio.writeRegister(CC1101_FREQ0, 0x6a);
 </CODE>
 
+Look at the LQI value in the debug output.  Lower is better.
+
 I have included a slightly modified version of CC1101_RF.  The only modification is to make all the functions public as I needed access to the low level stuff.
 
 To make the project, place all the files in the same directory and run:

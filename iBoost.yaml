@@ -1,0 +1,100 @@
+esphome:
+  name: cc1101
+  platform: ESP8266
+  board: d1_mini
+  includes:
+    - iBoost.h
+    - CC1101_RFx.h
+  libraries:
+    - SPI
+
+    
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  password: ""
+
+wifi:
+  ssid: "YOUR_SSID"
+  password: "YOUR PASSWORD"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Cc1101 Fallback Hotspot"
+    password: "fem3IwSSEgpX"
+
+captive_portal:
+
+    
+sensor:
+  - platform : custom
+    lambda: |- 
+      iBoost = new iBoostBuddy; // note: this is declared globally in iBoost.h
+      App.register_component(iBoost);
+      return {iBoost->heatingPower,iBoost->heatingToday,iBoost->heatingYesterday,iBoost->heatingLast7,iBoost->heatingLast28,iBoost->heatingLastGT,iBoost->heatingBoostTime}; 
+      
+    sensors:
+    - name: "iBoost Power"
+      unit_of_measurement: "W"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
+    - name: "iBoost Today"
+      unit_of_measurement: "Wh"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
+    - name: "iBoost Yesterday"
+      unit_of_measurement: "Wh"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
+    - name: "iBoost Last 7 Days"
+      unit_of_measurement: "Wh"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
+    - name: "iBoost Last 28 days"
+      unit_of_measurement: "Wh"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
+    - name: "iBoost Total"
+      unit_of_measurement: "Wh"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
+    - name: "iBoost Boost Time Remaining"
+      unit_of_measurement: "Min"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
+
+button:
+  - platform: template
+    name: "iBoost Manual Boost START"
+    id: BoostStart
+    icon: "mdi:solar-power"
+    on_press:
+      then:
+        - lambda: |-
+            iBoost->boost(id(boostTime).state); 
+
+  - platform: template
+    name: "iBoost Manual Boost CANCEL"
+    id: BoostCancel
+    icon: "mdi:solar-power"
+    on_press:
+      then:
+        - lambda: |-
+            iBoost->boost(0); 
+            
+number:
+  - platform : template
+    name: "iBoost Manual Boost Time"
+    id: boostTime
+    icon: "mdi:solar-power"
+    unit_of_measurement: "Minutes" 
+    optimistic: true
+    initial_value: 15
+    min_value: 0
+    max_value: 120
+    step: 15  

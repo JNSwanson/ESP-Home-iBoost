@@ -56,3 +56,10 @@ radio.writeRegister(CC1101_FREQ2, 0x21); // 868.300MHz  (868300000 <<16)/2600000
 radio.writeRegister(CC1101_FREQ1, 0x65);
 radio.writeRegister(CC1101_FREQ0, 0x6a);
 </CODE>
+
+I have included a slightly modified version of CC1101_RF.  The only modification is to make all the functions public as I needed access to the low level stuff.
+
+To make the project, place all the files in the same directory and run:
+<CODE>
+esphome run iBoost.yaml
+</CODE>

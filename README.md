@@ -16,7 +16,7 @@ It is based on a ESP8266 board and a CC1011 868MHz module.
 | GND     | GND           |
 | VCC     | 3.3V          |
 
-_IMPORTANT:_ CC1101-MISO + D6 + D2 need to be connected together.  MISO is connected with both D6 and D2. The MCU cannot do digitalRead with MISO(D6) when SPI is active, so we digitalRead(D2) instead
+_IMPORTANT:_ `CC1101-MISO` + `D6` + `D2` need to be connected together.  `MISO` is connected with both `D6` and `D2`. The MCU cannot do digitalRead with `MISO(D6)` when SPI is active, so we `digitalRead(D2)` instead
 
 ## CC1101 Module Pinout
 

@@ -69,7 +69,7 @@ radio.writeRegister(CC1101_FREQ1, 0x65);
 radio.writeRegister(CC1101_FREQ0, 0xe8);
 ```
 
-Look at the LQI value in the debug output for an indication of received packet quality.  Lower is better.  Using the default settings a typical LQI of around 100 could be seen at approx. 5M from the iBoost.  My changing the frequency to `21 65 EB` the LQI dropped to 1 or 2.  A significant improvement in packet quality.
+Look at the LQI value in the debug output for an indication of received packet quality.  Lower is better.  Using the default settings a typical LQI of around 100 could be seen at approx. 5M from the iBoost.  By changing the frequency to `21 65 EB` the LQI dropped to 1 or 2.  A significant improvement in packet quality.
 
 When looking at the debug output the bytes from the received packets are printed. The third byte represents the source of the packet:
 
@@ -94,7 +94,7 @@ Or
 Run the Docker container which provides a web interface, point your browser at `http://127.0.0.1:6052` and locate the `iBoost` device in the list, click the menu button and choose `Install`.
 
 If you receive an error along the lines of:
-`undefined reference to `_ZN6CC110113writeRegisterEhh'`
+```undefined reference to _ZN6CC110113writeRegisterEhh'```
 then you should copy `CC1101_*` in to `.esphome/build/cc1101/src/` and try again.
 
 I have included a slightly modified version of CC1101_RF.  The only modification is to make all the functions public as I needed access to the low level stuff.

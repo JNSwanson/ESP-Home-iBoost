@@ -36,9 +36,13 @@ sensor:
     lambda: |- 
       iBoost = new iBoostBuddy; // note: this is declared globally in iBoost.h
       App.register_component(iBoost);
-      return {iBoost->heatingPower,iBoost->heatingToday,iBoost->heatingYesterday,iBoost->heatingLast7,iBoost->heatingLast28,iBoost->heatingLastGT,iBoost->heatingBoostTime}; 
+      return {iBoost->heatingImport,iBoost->heatingPower,iBoost->heatingToday,iBoost->heatingYesterday,iBoost->heatingLast7,iBoost->heatingLast28,iBoost->heatingLastGT,iBoost->heatingBoostTime}; 
 
-sensors:
+    sensors:
+    - name: "iBoost Import"
+      unit_of_measurement: "W"
+      accuracy_decimals: 0
+      icon: "mdi:solar-power"
     - name: "iBoost Power"
       unit_of_measurement: "W"
       accuracy_decimals: 0
@@ -79,7 +83,22 @@ sensors:
       accuracy_decimals: 0
       device_class: duration
       icon: "mdi:solar-power"
-      
+
+text_sensor:
+  - platform : custom
+    lambda: |- 
+     return {iBoost->heatingMode}; 
+    text_sensors:
+    - name: "iBoost Mode"
+      icon: "mdi:solar-power"
+
+  - platform : custom
+    lambda: |- 
+     return {iBoost->heatingWarn}; 
+    text_sensors:
+    - name: "iBoost Warn"
+      icon: "mdi:solar-power"
+
 button:
   - platform: template
     name: "iBoost Manual Boost START"

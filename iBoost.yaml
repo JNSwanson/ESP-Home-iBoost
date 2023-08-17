@@ -47,29 +47,41 @@ sensor:
       unit_of_measurement: "W"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
+      device_class: power
     - name: "iBoost Today"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
+      device_class: energy
       icon: "mdi:solar-power"
+      state_class: total_increasing
     - name: "iBoost Yesterday"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
+      device_class: energy
+      state_class: total_increasing
     - name: "iBoost Last 7 Days"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
+      state_class: total_increasing
+      device_class: energy
     - name: "iBoost Last 28 days"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
+      device_class: energy
+      state_class: total_increasing
     - name: "iBoost Total"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
+      device_class: energy
+      state_class: total_increasing
     - name: "iBoost Boost Time Remaining"
       unit_of_measurement: "Min"
       accuracy_decimals: 0
+      device_class: duration
       icon: "mdi:solar-power"
 
 text_sensor:

@@ -1,4 +1,7 @@
 # ESP-Home-iBoost
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/jeremys)
+
 ESPHome Marlec iboost integration
 
 This project will allow you to monitor and control Marlec iBoost+ with Home Assistant.

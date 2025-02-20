@@ -374,4 +374,6 @@ class iBoostBuddy : public Component  {
     }
   }
 };
-iBoostBuddy * iBoost;
+#iBoostBuddy * iBoost;
+// Define the global instance here
+inline iBoostBuddy *iBoost = new iBoostBuddy();

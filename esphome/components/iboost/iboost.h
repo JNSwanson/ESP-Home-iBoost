@@ -391,7 +391,7 @@ class iBoostBuddy : public Component  {
     }
   }
 };
-extern iBoostBuddy *iBoost;  // Declare the global instance
+iBoostBuddy *iBoost = new iBoostBuddy();
 
 }  // namespace iboost
 }  // namespace esphome

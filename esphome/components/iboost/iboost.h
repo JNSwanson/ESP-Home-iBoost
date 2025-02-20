@@ -61,7 +61,12 @@ SOFTWARE.
 
 #include "esphome/core/log.h"
 #include "esphome/core/component.h"
+#include "esphome/components/sensor/sensor.h"
+#include "esphome/components/text_sensor/text_sensor.h"
 #include "esphome/components/cc1101/cc1101.h"
+
+namespace esphome {
+namespace iboost {
 
 
 #define PRINTLN(x, ...) Serial.println(x, ##__VA_ARGS__)
@@ -107,6 +112,18 @@ class iBoostBuddy : public Component  {
 	
   void setup() override {
     // This will be called by App.setup()
+    App.register_sensor(heatingImport);
+    App.register_sensor(heatingPower);
+    App.register_sensor(heatingToday);
+    App.register_sensor(heatingYesterday);
+    App.register_sensor(heatingLast7);
+    App.register_sensor(heatingLast28);
+    App.register_sensor(heatingLastGT);
+    App.register_sensor(heatingBoostTime);
+
+    App.register_text_sensor(heatingMode);
+    App.register_text_sensor(heatingWarn);
+	  
     addressLQI = 255; // set received LQI to lowest value
     addressValid=false;
     SPI.begin();
@@ -374,6 +391,7 @@ class iBoostBuddy : public Component  {
     }
   }
 };
-#iBoostBuddy * iBoost;
-// Define the global instance here
-inline iBoostBuddy *iBoost = new iBoostBuddy();
+extern iBoostBuddy *iBoost;  // Declare the global instance
+
+}  // namespace iboost
+}  // namespace esphome

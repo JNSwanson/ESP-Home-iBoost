@@ -59,6 +59,9 @@ SOFTWARE.
 	
 ******************************************************************************************************/
 
+#ifndef ESPHOME_COMPONENTS_IBOOST_IBOOST_H
+#define ESPHOME_COMPONENTS_IBOOST_IBOOST_H
+
 #include "esphome/core/log.h"
 #include "esphome/core/component.h"
 #include "esphome/components/sensor/sensor.h"
@@ -90,20 +93,22 @@ enum { // codes for the various requests and responses
 long today, yesterday, last7, last28, total;
 
 
-class iBoostBuddy : public Component  {
-	//        CSN-PIN  Connected-with-MISO-PIN
-  public:
- 
-	TextSensor *heatingMode = new TextSensor();
-	TextSensor *heatingWarn = new TextSensor();
-	Sensor *heatingImport = new Sensor();
-	Sensor *heatingPower = new Sensor();
-	Sensor *heatingToday = new Sensor();
-	Sensor *heatingYesterday = new Sensor();
-	Sensor *heatingLast7 = new Sensor();
-	Sensor *heatingLast28 = new Sensor();
-	Sensor *heatingLastGT = new Sensor();
-	Sensor *heatingBoostTime = new Sensor();
+class iBoostBuddy : public Component {
+ public:
+  // Sensor declarations
+  sensor::Sensor *heatingImport = new sensor::Sensor();
+  sensor::Sensor *heatingPower = new sensor::Sensor();
+  sensor::Sensor *heatingToday = new sensor::Sensor();
+  sensor::Sensor *heatingYesterday = new sensor::Sensor();
+  sensor::Sensor *heatingLast7 = new sensor::Sensor();
+  sensor::Sensor *heatingLast28 = new sensor::Sensor();
+  sensor::Sensor *heatingLastGT = new sensor::Sensor();
+  sensor::Sensor *heatingBoostTime = new sensor::Sensor();
+
+  // Text sensor declarations
+  text_sensor::TextSensor *heatingMode = new text_sensor::TextSensor();
+  text_sensor::TextSensor *heatingWarn = new text_sensor::TextSensor();
+
   //iBoostBuddy() : PollingComponent(100) { }
 	
   float get_setup_priority() const override { return esphome::setup_priority::LATE; }
@@ -395,3 +400,4 @@ extern iBoostBuddy *iBoost; //ensures the global instance is declared.
 
 }  // namespace iboost
 }  // namespace esphome
+#endif

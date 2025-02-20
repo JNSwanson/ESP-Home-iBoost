@@ -61,7 +61,7 @@ SOFTWARE.
 
 #include "esphome/core/log.h"
 #include "esphome/core/component.h"
-#include "esphome/components/cc1101_rfx/cc1101_rfx.h"
+#include "esphome/components/cc1101/cc1101.h"
 
 
 #define PRINTLN(x, ...) Serial.println(x, ##__VA_ARGS__)

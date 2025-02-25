@@ -1,86 +1,12 @@
-/*************************************************************************************************
-
- ________    ______    _______    ____  ____                                 
-|_   __  | .' ____ \  |_   __ \  |_   ||   _|                                
-  | |_ \_| | (___ \_|   | |__) |   | |__| |     .--.    _ .--..--.    .---.  
-  |  _| _   _.____`.    |  ___/    |  __  |   / .'`\ \ [ `.-. .-. |  / /__\\ 
- _| |__/ | | \____) |  _| |_      _| |  | |_  | \__. |  | | | | | |  | \__., 
-|________|  \______.' |_____|    |____||____|  '.__.'  [___||__||__]  '.__.' 
-                                                                             
-              _    ______                                _                   
-             (_)  |_   _ \                              / |_                 
-             __     | |_) |    .--.     .--.    .--.   `| |-'                
-            [  |    |  __'.  / .'`\ \ / .'`\ \ ( (`\]   | |                  
-             | |   _| |__) | | \__. | | \__. |  `'.'.   | |,                 
-            [___] |_______/   '.__.'   '.__.'  [\__) )  \__/                 
-                                                                             
-                                                                             
-
-MIT License
-
-Copyright (c) 2023 JNSwanson
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
-*************************************************************************************************
-
-
-    WARNING  : MISO is connected with both D6 and D2. The MCU cannot do digitalRead with MISO(D6)
-    when SPI is active, so we digitalRead(D2) instead
-
-
-      PIN connections
-   CC1101         NodeMCU
-
-    CSN           D8(CS)
-    CSK(CLK)      D5()
-    MISO          D6(MISO) + D2(for digitalRead) (IMPORTANT CC1101-MISO + D6 + D2 are connected)
-    MOSI          D7(MOSI)
-    GND           GND
-    VCC           3.3V
-
-	
-******************************************************************************************************/
-
-#ifndef ESPHOME_COMPONENTS_IBOOST_IBOOST_H
-#define ESPHOME_COMPONENTS_IBOOST_IBOOST_H
-
+#include "iboost.h"
 #include "esphome/core/log.h"
-#include "esphome/core/component.h"
-#include "esphome/components/sensor/sensor.h"
-#include "esphome/components/text_sensor/text_sensor.h"
-#include "esphome/components/cc1101/cc1101.h"
 
 namespace esphome {
 namespace iboost {
 
 
-#define PRINTLN(x, ...) Serial.println(x, ##__VA_ARGS__)
-#define PRINT(x, ...) Serial.print(x, ##__VA_ARGS__)
-
-
-static const char *const TAG = "iBoost";
-
-
-CC1101 radio(D8,  D2);
-
+// Global instance
+iBoost *global_iboost = nullptr;
 
 enum { // codes for the various requests and responses
   SAVED_TODAY = 0xCA,
@@ -92,42 +18,50 @@ enum { // codes for the various requests and responses
 
 long today, yesterday, last7, last28, total;
 
+esphome::cc1101::CC1101 radio(D8, D2);
 
-class iBoostBuddy : public Component {
- public:
-  // Sensor declarations
-  sensor::Sensor *heatingImport = new sensor::Sensor();
-  sensor::Sensor *heatingPower = new sensor::Sensor();
-  sensor::Sensor *heatingToday = new sensor::Sensor();
-  sensor::Sensor *heatingYesterday = new sensor::Sensor();
-  sensor::Sensor *heatingLast7 = new sensor::Sensor();
-  sensor::Sensor *heatingLast28 = new sensor::Sensor();
-  sensor::Sensor *heatingLastGT = new sensor::Sensor();
-  sensor::Sensor *heatingBoostTime = new sensor::Sensor();
+    // used for the periodic pings see below
+  uint32_t pingTimer;
+  // used for LED blinking when we receive a packet
+  uint32_t ledTimer;
 
-  // Text sensor declarations
-  text_sensor::TextSensor *heatingMode = new text_sensor::TextSensor();
-  text_sensor::TextSensor *heatingWarn = new text_sensor::TextSensor();
+  uint32_t rxTimer;
 
-  //iBoostBuddy() : PollingComponent(100) { }
-	
-  float get_setup_priority() const override { return esphome::setup_priority::LATE; }
+  //static uint8_t txStart[] = {CC1101_SIDLE, CC1101_TXFIFO, CC1101_AGCCTRL0};
+  uint8_t txBuf[32];
+  uint8_t request;
+  bool boostRequest;
+  uint8_t boostTime;
+  uint8_t address[2]; // this is the address of the sender
+  uint8_t addressLQI, rxLQI; // signal strength test 
+  bool addressValid;
 
-	
-	
-  void setup() override {
-    // This will be called by App.setup()
-    App.register_sensor(heatingImport);
-    App.register_sensor(heatingPower);
-    App.register_sensor(heatingToday);
-    App.register_sensor(heatingYesterday);
-    App.register_sensor(heatingLast7);
-    App.register_sensor(heatingLast28);
-    App.register_sensor(heatingLastGT);
-    App.register_sensor(heatingBoostTime);
+// Register component
+void register_iboost() {
+  global_iboost = new iBoost();
+  App.register_component(global_iboost);
+}
 
-    App.register_text_sensor(heatingMode);
-    App.register_text_sensor(heatingWarn);
+  void iBoost::setup()  {
+    // Initialize text sensors
+    if (heating_mode != nullptr) {
+        heating_mode->publish_state("Initializing...");
+    }
+    if (heating_warn != nullptr) {
+        heating_warn->publish_state("No Warnings");
+    }
+
+    // Initialize numeric sensors
+    if (heating_import) heating_import->publish_state(0);
+    if (heating_power) heating_power->publish_state(0);
+    if (heating_today) heating_today->publish_state(0);
+    if (heating_yesterday) heating_yesterday->publish_state(0);
+    if (heating_last_7) heating_last_7->publish_state(0);
+    if (heating_last_28) heating_last_28->publish_state(0);
+    if (heating_last_gt) heating_last_gt->publish_state(0);
+    if (heating_boost_time) heating_boost_time->publish_state(0);
+
+
 	  
     addressLQI = 255; // set received LQI to lowest value
     addressValid=false;
@@ -135,9 +69,13 @@ class iBoostBuddy : public Component {
     Serial.println("SPI OK");
     ESP_LOGW(TAG, "SPI OK");
     radio.reset();
-    radio.begin(868.300e6); // Freq=433.2Mhz. Do not forget the "e6"
+	Serial.println("RadioReset");
+    radio.begin(868.300e6); // Freq=868.3Mhz. Do not forget the "e6"
+	Serial.println("RadioReg");
     radio.setMaxPktSize(61);
+	Serial.println("RadioReg");
     radio.writeRegister(CC1101_FREQ2, 0x21); // 868.300MHz  (868300000 <<16)/26000000
+	Serial.println("RadioReg");
     radio.writeRegister(CC1101_FREQ1, 0x65);
     radio.writeRegister(CC1101_FREQ0, 0x6a);
     radio.writeRegister(CC1101_FSCTRL1, 0x08); // fif=203.125kHz
@@ -171,7 +109,6 @@ class iBoostBuddy : public Component {
     radio.writeRegister(CC1101_PKTCTRL1, 0x04); // Sync word is always accepted Automatic flush of RX FIFO when CRC is not OK disabled Two status bytes will be appended to the payload of the packet. The status bytes contain RSSI and LQI values, as well as CRC OK. No address checkof received packages.
     radio.writeRegister(CC1101_PKTCTRL0, 0x05); // Data whitening off Normal mode, use FIFOs for RX and TX CRC calculation in TX and CRC check in RX enabled Variable packet length mode. Packet length configured by the first byte after sync word
     radio.writeRegister(CC1101_ADDR, 0x00); // Address used for packet filtration. Optional broadcast addresses are 0 (0x00) and 255 (0xFF).
-
     static uint8_t paTable[] = {0xC6, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F};
     radio.writeBurstRegister(CC1101_PATABLE, paTable, sizeof(paTable));
 
@@ -187,29 +124,18 @@ class iBoostBuddy : public Component {
     Serial.println("Setup Finished");
     ESP_LOGW(TAG, "Setup Finished");
   }
-  
-  // used for the periodic pings see below
-  uint32_t pingTimer;
-  // used for LED blinking when we receive a packet
-  uint32_t ledTimer;
 
-  uint32_t rxTimer;
 
-  //static uint8_t txStart[] = {CC1101_SIDLE, CC1101_TXFIFO, CC1101_AGCCTRL0};
-  uint8_t txBuf[32];
-  uint8_t request;
-  bool boostRequest;
-  uint8_t boostTime;
-  uint8_t address[2]; // this is the address of the sender
-  uint8_t addressLQI, rxLQI; // signal strength test 
-  bool addressValid;
-
-  void boost(uint8_t boost_time){
+  void iBoost::boost(uint8_t boost_time){
     boostTime = boost_time;
     boostRequest = true;	
   }
   
-  void loop() override {
+  void iBoost::update(){
+	  
+  }
+  
+  void iBoost::loop()  {
     // Turn on the LED for 200ms without blocking the loop.
     // The Buildin LED on NodeMCU is ON when LOW
     digitalWrite(LED_BUILTIN, millis() - ledTimer > 200);
@@ -368,36 +294,38 @@ class iBoostBuddy : public Component {
         Serial.print(total);
         Serial.print(",Boost Time=");
         Serial.println(boostTime);
-        if (cylinderHot)
-          heatingMode->publish_state("Water Tank HOT");
-        else if (boostTime > 0)
-          heatingMode->publish_state("Manual Boost ON");
-        else if (waterHeating)
-          heatingMode->publish_state("Heating by Solar");
-        else
-          heatingMode->publish_state("Water Heating OFF");
-        if (packet[12] == 0x01)
-          heatingWarn->publish_state("Sender Battery LOW");
-        else
-          heatingWarn->publish_state("");
-        heatingImport->publish_state(p1 / 360);
-        heatingPower->publish_state(heating);
-        heatingToday->publish_state(today);
-        heatingYesterday->publish_state(yesterday);
+		if (heating_mode->has_state()) {
+		  if (cylinderHot)
+			heating_mode->publish_state("Water Tank HOT");
+		  else if (boostTime > 0)
+			heating_mode->publish_state("Manual Boost ON");
+		  else if (waterHeating)
+			heating_mode->publish_state("Heating by Solar");
+		  else
+			heating_mode->publish_state("Water Heating OFF");
+		}
+
+		if (heating_warn->has_state()) {
+		  if (packet[12] == 0x01)
+			heating_warn->publish_state("Sender Battery LOW");
+		  else
+			heating_warn->publish_state("");
+		}
+        heating_import->publish_state(p1 / 360);
+        heating_power->publish_state(heating);
+        heating_today->publish_state(today);
+        heating_yesterday->publish_state(yesterday);
         if(last7 > 0)
-          heatingLast7->publish_state(last7);
+          heating_last_7->publish_state(last7);
         if(last28 > 0)
-          heatingLast28->publish_state(last28);
+          heating_last_28->publish_state(last28);
         if(total>0)
-          heatingLastGT->publish_state(total);
-        heatingBoostTime->publish_state(boostTime);
+          heating_last_gt->publish_state(total);
+        heating_boost_time->publish_state(boostTime);
       }
       ledTimer = millis();
     }
   }
-};
-extern iBoostBuddy *iBoost; //ensures the global instance is declared.
 
 }  // namespace iboost
 }  // namespace esphome
-#endif

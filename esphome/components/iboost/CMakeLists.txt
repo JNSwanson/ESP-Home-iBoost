@@ -1,1 +1,0 @@
-esphome_register_component(iboost)

@@ -1,28 +1,14 @@
 esphome:
   name: cc1101
-  
+  platform: ESP8266
+  board: d1_mini
+  includes:
+    - iBoost.h
+    - CC1101_RFx.h
   libraries:
     - SPI
-    
-esp8266:
-  board: d1_mini
-  framework:
-    version: latest
 
     
-external_components:
-  - source:
-      type: git
-      url: https://github.com/JNSwanson/ESP-Home-iBoost/
-      #type: local # Alternative.  Clone from git and point to the local files:
-      #path: "C:\\Users\\<your Name>\\iboostSrc\\ESP-Home-iBoost\\esphome\\components" 
-    components:
-      - cc1101    
-      - iboost
- 
-cc1101:
-text_sensor: 
-
 # Enable logging
 logger:
 
@@ -35,125 +21,84 @@ ota:
    password: ""
 
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-
+  ssid: "YOUR_SSID"
+  password: "YOUR PASSWORD"
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Cc1101 Fallback Hotspot"
     password: "????????"
- 
-  # Optional MQTT support 
-#mqtt:
-#  topic_prefix: "iBoost"
-#  discovery: false
-#  broker: !secret mqtt_broker_ipaddress
-#  port: 1883
-#  username: !secret mqtt_user
-#  password: !secret mqtt_password
-#  discovery_prefix: homeassistant
-  
-# Optional Web configuration entry
-web_server:
-  port: 80
-  version: 1
 
 captive_portal:
 
     
 sensor:
-  - platform: iboost
-    id: iboost_iboost_id
-    
-    heating_import:
-      name: "iBoost Import"
+  - platform : custom
+    lambda: |- 
+      iBoost = new iBoostBuddy; // note: this is declared globally in iBoost.h
+      App.register_component(iBoost);
+      return {iBoost->heatingImport,iBoost->heatingPower,iBoost->heatingToday,iBoost->heatingYesterday,iBoost->heatingLast7,iBoost->heatingLast28,iBoost->heatingLastGT,iBoost->heatingBoostTime}; 
+
+    sensors:
+    - name: "iBoost Import"
       unit_of_measurement: "W"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
-
-    heating_power:
-      name: "iBoost Power"
+    - name: "iBoost Power"
       unit_of_measurement: "W"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
       device_class: power
-
-    heating_today:
-      name: "iBoost Today"
+    - name: "iBoost Today"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       device_class: energy
       icon: "mdi:solar-power"
       state_class: total_increasing
-
-    heating_yesterday:
-      name: "iBoost Yesterday"
+    - name: "iBoost Yesterday"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
       device_class: energy
       state_class: total_increasing
-      disabled_by_default: false
-      id: sensor_sensor_id_4
-      force_update: false
-      internal: false
-      entity_category: diagnostic
-
-    heating_last_7:
-      name: "iBoost Last 7 Days"
+    - name: "iBoost Last 7 Days"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
       state_class: total_increasing
       device_class: energy
-      internal: false
-      entity_category: diagnostic
-
-    heating_last_28:
-      name: "iBoost Last 28 Days"
+    - name: "iBoost Last 28 days"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
       device_class: energy
       state_class: total_increasing
-      internal: false
-      entity_category: diagnostic
-
-    heating_last_gt:
-      name: "iBoost Total"
+    - name: "iBoost Total"
       unit_of_measurement: "Wh"
       accuracy_decimals: 0
       icon: "mdi:solar-power"
       device_class: energy
       state_class: total_increasing
-      internal: false
-      entity_category: diagnostic
-
-    heating_boost_time:
-      name: "iBoost Boost Time Remaining"
+    - name: "iBoost Boost Time Remaining"
       unit_of_measurement: "Min"
       accuracy_decimals: 0
       device_class: duration
       icon: "mdi:solar-power"
-      internal: false
-      entity_category: diagnostic
 
-# Ensure `text_sensor:` is at the correct level
-#text_sensor:
-#  - platform: cc1101
-#  
-#  - platform: iboost
-    heating_mode:
-      name: "iBoost Mode"
+text_sensor:
+  - platform : custom
+    lambda: |- 
+     return {iBoost->heatingMode}; 
+    text_sensors:
+    - name: "iBoost Mode"
       icon: "mdi:solar-power"
 
-    heating_warn:
-      name: "iBoost Warn"
+  - platform : custom
+    lambda: |- 
+     return {iBoost->heatingWarn}; 
+    text_sensors:
+    - name: "iBoost Warn"
       icon: "mdi:solar-power"
-
-
-
 
 button:
   - platform: template
@@ -163,7 +108,7 @@ button:
     on_press:
       then:
         - lambda: |-
-            id(iboost_iboost_id)->boost(id(boostTime).state);
+            iBoost->boost(id(boostTime).state); 
 
   - platform: template
     name: "iBoost Manual Boost CANCEL"
@@ -172,7 +117,7 @@ button:
     on_press:
       then:
         - lambda: |-
-            id(iboost_iboost_id)->boost(0);
+            iBoost->boost(0); 
             
 number:
   - platform : template

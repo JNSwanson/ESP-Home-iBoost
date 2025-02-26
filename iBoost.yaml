@@ -94,11 +94,6 @@ sensor:
       icon: "mdi:solar-power"
       device_class: energy
       state_class: total_increasing
-      disabled_by_default: false
-      id: sensor_sensor_id_4
-      force_update: false
-      internal: false
-      entity_category: diagnostic
 
     heating_last_7:
       name: "iBoost Last 7 Days"
@@ -107,8 +102,6 @@ sensor:
       icon: "mdi:solar-power"
       state_class: total_increasing
       device_class: energy
-      internal: false
-      entity_category: diagnostic
 
     heating_last_28:
       name: "iBoost Last 28 Days"
@@ -117,8 +110,6 @@ sensor:
       icon: "mdi:solar-power"
       device_class: energy
       state_class: total_increasing
-      internal: false
-      entity_category: diagnostic
 
     heating_last_gt:
       name: "iBoost Total"
@@ -127,8 +118,6 @@ sensor:
       icon: "mdi:solar-power"
       device_class: energy
       state_class: total_increasing
-      internal: false
-      entity_category: diagnostic
 
     heating_boost_time:
       name: "iBoost Boost Time Remaining"
@@ -136,8 +125,6 @@ sensor:
       accuracy_decimals: 0
       device_class: duration
       icon: "mdi:solar-power"
-      internal: false
-      entity_category: diagnostic
 
 # Ensure `text_sensor:` is at the correct level
 #text_sensor:

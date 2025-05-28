@@ -1,4 +1,4 @@
-# ESP-Home-iBoost
+[⚠️ Suspicious Content] # ESP-Home-iBoost
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/jeremys)
 
@@ -39,7 +39,7 @@ CSN   |o__________________|
 ## Frequency tuning
 
 I bought a few of these modules and most have Xtals that are a little off frequency.  This affects the quality of the received packets and can dramatically decrease the range at which you can receive packets from the iBoost.
-You can buy a better Xtal like Epson X1E0000210666 from Farnell (2471832), or change the frequency in the `iBoost.h` file.
+You can buy a better Xtal like Epson X1E0000210666 from Farnell (2471832), or change the frequency in the `iBoost.cpp` file.
 
 Below are some suggested values.  The default is 868300000.
 
@@ -57,7 +57,7 @@ Below are some suggested values.  The default is 868300000.
 | 868200000 | 2188398 | 21646E |
 | 868175000 | 2188335 | 21642F |
 
-To make these changes you will need to edit `iBoost.h` and change these lines:
+To make these changes you will need to clone the esphome directory structure and change the source in the `.yaml` file to point to the local directory.  Next edit `iBoost.cpp` and change these lines:
 
 ```
 radio.writeRegister(CC1101_FREQ2, 0x21); // 868.300MHz  (868300000 <<16)/26000000
@@ -82,23 +82,14 @@ When looking at the debug output the bytes from the received packets are printed
 
 You should optimize receive quality for the iBoost main unit (0x22).
 
-When you make a change to `iBoost.h` you will need to rebuild and re-flash your ESP8266 device with the new code.
+When you make a change to `iBoost.cpp` you will need to rebuild and re-flash your ESP8266 device with the new code.
 
 ## Building the project
 
-This project needs to be built from within [ESPHome](https://esphome.io/).  You can do this from Home Assistant if you have the relevant add-on installed (you need to be running Home Assistant supervisor for this) or from the ESPHome [command line interface](https://esphome.io/guides/getting_started_command_line.html) which can be installed as a Python module or as a Docker container.  Full details on how to install ESPHome are available on the ESP web page.
+To build the project, edit the `iBoost.yaml` and/or create a `secrets.yaml` file and  run:
 
-Once ESPHome is installed you need to copy all the files from this repo in to the ESPHome working directory (called "config" directory in the Docker version) and either:
+`esphome run iBoost.yaml` from the command line.
 
-Run `esphome run iBoost.yaml` from the command line.
+The neccessary files will automatically be downloaded from this repository.
 
-Or
-
-Run the Docker container which provides a web interface, point your browser at `http://127.0.0.1:6052` and locate the `iBoost` device in the list, click the menu button and choose `Install`.
-
-If you receive an error along the lines of:
-```undefined reference to _ZN6CC110113writeRegisterEhh'```
-then you should copy `CC1101_*` in to `.esphome/build/cc1101/src/` and try again.
-
-I have included a slightly modified version of CC1101_RF.  The only modification is to make all the functions public as I needed access to the low level stuff.
 

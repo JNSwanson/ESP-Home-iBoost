@@ -90,6 +90,6 @@ To build the project, edit the `iBoost.yaml` and/or create a `secrets.yaml` file
 
 `esphome run iBoost.yaml` from the command line.
 
-The neccessary files will automatically be downloaded from this repository.
+The necessary files will automatically be downloaded from this repository.
 
 

@@ -96,7 +96,7 @@ namespace esphome {
         long p1, p2;
         char pbuf[32];
         byte boostTime;
-        bool waterHeating, cylinderHot, batteryLow overheat;
+        bool waterHeating, cylinderHot, batteryLow, overheat;
 
         // Register component
         void register_iboost() {

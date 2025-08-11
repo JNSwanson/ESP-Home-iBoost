@@ -96,7 +96,7 @@ namespace esphome {
         long p1, p2;
         char pbuf[32];
         byte boostTime;
-        bool waterHeating, cylinderHot, batteryLow;
+        bool waterHeating, cylinderHot, batteryLow overheat;
 
         // Register component
         void register_iboost() {
@@ -325,6 +325,10 @@ namespace esphome {
                         cylinderHot = true;
                     else
                         cylinderHot = false;
+                    if(packet[13]) // this indicates the iBoost unit is overheating
+                        overheat = true;
+                    else
+                        overheat = false;
                     boostTime = packet[5]; // boost time remaining (minutes)
                     //Serial.print("Heating=");
                     //Serial.print(heating );
@@ -357,7 +361,9 @@ namespace esphome {
                         total = p2;
                         break;
                     }
-                    if (cylinderHot)
+                    if(overheat)
+                        Serial.print(",Overheat Check Vents");
+                    else if (cylinderHot)
                         Serial.print(",Water Tank HOT");
                     else if (boostTime > 0)
                         Serial.print(",Manual Boost ON");
@@ -395,7 +401,9 @@ namespace esphome {
             case RXSTATE_PUBLISH_RESULTS:
                 Serial.println("Publishing results");
                 if (heating_mode -> has_state()) {
-                    if (cylinderHot)
+                    if(overheat)
+                        heating_mode -> publish_state("Overheat. Check Vents");
+                    else if (cylinderHot)
                         heating_mode -> publish_state("Water Tank HOT");
                     else if (boostTime > 0)
                         heating_mode -> publish_state("Manual Boost ON");

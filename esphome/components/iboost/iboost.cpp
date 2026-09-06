@@ -278,28 +278,14 @@ namespace esphome {
                 if (pkt_size > 0 && radio.crcok()) { // We have a valid packet with some data
                     rxTimer = millis();
                     rxLQI = radio.getLQI();
-                    Serial.print("Got packet from ");
-                    if (packet[2] == PACKET_BUDDY) Serial.print("Buddy,");
-                    else if (packet[2] == PACKET_IBOOST) Serial.print("iBoost,");
-                    else if (packet[2] == PACKET_SENDER) Serial.print("Sender,");
-                    else Serial.print("Unknown,");
-                    Serial.print("Address=0x");
-                    sprintf(pbuf, "%02x", packet[0]);
-                    Serial.print(pbuf);
-                    sprintf(pbuf, "%02x", packet[1]);
-                    Serial.print(pbuf);
-                    // Debug output
-                    /*for (int i = 0; i < pkt_size; i++) {
-                      sprintf(pbuf, "%02x", packet[i]);
-                      Serial.print(pbuf); //packet[i], HEX);
-                      Serial.print(",");
-                    }*/
-                    Serial.print(",len=");
-                    Serial.print(pkt_size);
-                    Serial.print(" Signal="); // for field tests to check the signal strength
-                    Serial.print(radio.getRSSIdbm());
-                    Serial.print(" LQI="); // for field tests to check the signal quality
-                    Serial.println(rxLQI);
+                    {
+                        const char *pkt_type = (packet[2] == PACKET_BUDDY) ? "Buddy" :
+                                               (packet[2] == PACKET_IBOOST) ? "iBoost" :
+                                               (packet[2] == PACKET_SENDER) ? "Sender" : "Unknown";
+                        ESP_LOGD(TAG, "Got packet from %s, Address=0x%02x%02x, len=%d, Signal=%d, LQI=%d",
+                                 pkt_type, packet[0], packet[1], pkt_size, radio.getRSSIdbm(), rxLQI);
+                    }
+                    if (signal_lqi) signal_lqi->publish_state(rxLQI);
                     if ((packet[2] == PACKET_BUDDY && pkt_size == 29) // buddy request
                         ||
                         (packet[2] == PACKET_SENDER && pkt_size == 44) // sender packet
@@ -309,9 +295,7 @@ namespace esphome {
                             address[0] = packet[0]; // save the address of the packet	0x1c7b; //
                             address[1] = packet[1];
                             addressValid = true;
-                            Serial.print("Updated the address to:");
-                            sprintf(pbuf, "%02x,%02x", address[0], address[1]);
-                            Serial.println(pbuf);
+                            ESP_LOGD(TAG, "Updated the address to: %02x,%02x", address[0], address[1]);
                         }
                     }
                     ledTimer = millis();

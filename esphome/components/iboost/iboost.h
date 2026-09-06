@@ -118,6 +118,7 @@ class iBoost : public PollingComponent {
     void set_heating_last_28(sensor::Sensor *sensor) { heating_last_28 = sensor; }
     void set_heating_last_gt(sensor::Sensor *sensor) { heating_last_gt = sensor; }
     void set_heating_boost_time(sensor::Sensor *sensor) { heating_boost_time = sensor; }
+    void set_signal_lqi(sensor::Sensor *sensor) { signal_lqi = sensor; }
     void set_heating_mode(text_sensor::TextSensor *sensor) { heating_mode = sensor; }
     void set_heating_warn(text_sensor::TextSensor *sensor) { heating_warn = sensor; }
 
@@ -130,6 +131,7 @@ private:
     sensor::Sensor *heating_last_28{nullptr};
     sensor::Sensor *heating_last_gt{nullptr};
     sensor::Sensor *heating_boost_time{nullptr};
+    sensor::Sensor *signal_lqi{nullptr};
     text_sensor::TextSensor *heating_mode{nullptr};
     text_sensor::TextSensor *heating_warn{nullptr};
 

@@ -14,8 +14,9 @@ external_components:
   - source:
       type: git
       url: https://github.com/JNSwanson/ESP-Home-iBoost/
-      #type: local # Alternative.  Clone from git and point to the local files:
-      #path: "C:\\Users\\<your Name>\\iboostSrc\\ESP-Home-iBoost\\esphome\\components" 
+      #type: local # Alternative: point at a local clone instead of git. Use a path
+      #             relative to this yaml file so it works on any OS/machine, e.g.:
+      #path: "esphome/components"
     components:
       - cc1101    
       - iboost
@@ -125,6 +126,11 @@ sensor:
       accuracy_decimals: 0
       device_class: duration
       icon: "mdi:solar-power"
+
+    signal_lqi:
+      name: "iBoost Signal LQI"
+      accuracy_decimals: 0
+      icon: "mdi:signal-cellular-outline"
 
 # Ensure `text_sensor:` is at the correct level
 #text_sensor:

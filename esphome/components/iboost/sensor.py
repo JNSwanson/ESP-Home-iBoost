@@ -49,6 +49,9 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional("heating_boost_time"): sensor.sensor_schema(
             unit_of_measurement=UNIT_MINUTE, accuracy_decimals=0, device_class=DEVICE_CLASS_DURATION
         ),
+        cv.Optional("signal_lqi"): sensor.sensor_schema(
+            accuracy_decimals=0, icon="mdi:signal-cellular-outline"
+        ),
 
         # Text Sensors
         cv.Optional("heating_mode"): text_sensor.text_sensor_schema(),
@@ -61,7 +64,7 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     # Register numeric sensors
-    for key in ["heating_import", "heating_power", "heating_today", "heating_yesterday", "heating_last_7", "heating_last_28", "heating_last_gt", "heating_boost_time"]:
+    for key in ["heating_import", "heating_power", "heating_today", "heating_yesterday", "heating_last_7", "heating_last_28", "heating_last_gt", "heating_boost_time", "signal_lqi"]:
         if key in config:
             sens = await sensor.new_sensor(config[key])
             cg.add(getattr(var, f"set_{key}")(sens))
